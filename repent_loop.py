@@ -211,6 +211,7 @@ class ResnetPeriodEstimator(tf.keras.models.Model):
     imgs = tf.cast(imgs, tf.float32)
     imgs -= 127.5
     imgs /= 127.5
+#     print("=====imgs.shape====",imgs.shape)
     imgs = tf.image.resize(imgs, (self.image_size, self.image_size))
     return imgs
 
@@ -883,22 +884,21 @@ import pandas as pd
 
 base = './../../data/EchoNet-Dynamic/'
 flist = pd.read_csv(base+'FileList.csv')
+name = 'c3'
 # df = pd.DataFrame({"FileName": 'test.avi',"pred_period": [1], "pred_score": [1], "within_period":[[1,1,1,1]], 'per_frame_counts':[[1,1,1,1]], 'chosen_stride':[1]})
-with open( "./counts.csv", "a") as f:
-    with open( "./counts_within.csv", "a") as g:    
-        with open( "./counts_per_frame_counts.csv", "a") as h:
-            if not os.path.isfile("./counts.csv"):
+with open( "./counts_"+name+".csv", "a") as f:
+    with open( "./counts_within_"+name+".csv", "a") as g:    
+        with open( "./counts_per_frame_counts_"+name+".csv", "a") as h:
+            if not os.path.isfile("./counts_"+name+".csv"):
                 f.write("FileName,pred_period,pred_score,chosen_stride\n")
                 g.write("FileName,frame,within_period\n")
                 h.write("FileName,frame,per_frame_counts\n")
-            for i in range(268,1000): #len(flist)):  
+            for i in range(3000,len(flist)):  
                 fname = flist.iloc[i,0]
                 PATH_TO_VIDEO_ON_YOUR_DRIVE = base + 'Videos/' + fname
-#                 if os.path.isfile('./tmp/'+fname+'.mp4'):
-#                     continue
+                if os.path.isfile('./tmp/'+fname+'.mp4') or fname== "0X3E04B170778411F9.avi":
+                    continue
                 imgs, vid_fps = read_video(PATH_TO_VIDEO_ON_YOUR_DRIVE)
-            #     show_video(PATH_TO_VIDEO_ON_YOUR_DRIVE)
-
                 print('Running RepNet...id:',i, fname) 
                 (pred_period, pred_score, within_period,
                  per_frame_counts, chosen_stride) = get_counts(
@@ -927,16 +927,16 @@ with open( "./counts.csv", "a") as f:
 
                 # Debugging video showing scores, per-frame frequency prediction and 
                 # within_period scores.
-#                 create_count_video(imgs,
-#                                    per_frame_counts,
-#                                    within_period,
-#                                    score=pred_score,
-#                                    fps=vid_fps,
-#                                    output_file='./tmp/'+fname+'.mp4',
-#                                    delay=1000/VIZ_FPS,
-#                                    plot_count=True,
-#                                    plot_within_period=True,
-#                                    plot_score=True)
+                create_count_video(imgs,
+                                   per_frame_counts,
+                                   within_period,
+                                   score=pred_score,
+                                   fps=vid_fps,
+                                   output_file='./tmp/'+fname+'.mp4',
+                                   delay=1000/VIZ_FPS,
+                                   plot_count=True,
+                                   plot_within_period=True,
+                                   plot_score=True)
     
 #     df.to_csv('./counts.csv')
 # -
